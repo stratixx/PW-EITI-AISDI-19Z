@@ -10,6 +10,8 @@ Zadanie:
 
 #include <iostream>
 #include <list>
+#include <algorithm>    // std::for_each
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////
@@ -70,13 +72,32 @@ deck_t& generate(deck_t& deck)
 
 deck_t& shuffle(deck_t& deck)
 {
-    cout<<"Shuffle "<<endl;
+    card_t card;
+    deck_t::iterator iter;
+
+    cout<<"Shuffle start..."<<endl;
+
+    iter = deck.begin();
+
+    for(int n=0; n<deck.size(); ++n)
+    {
+        
+    }
+
+    cout<<"Shuffle end."<<endl;
     return deck;
+}
+
+void printCard(card_t card)
+{
+    cout<<"Card( Number: "<<card.number<<"\tColour: "<<card.colour<<" )"<<endl;
 }
 
 void printDeck(deck_t& deck)
 {
-    cout<<"Print deck "<<endl;
+    cout<<"Printing deck..."<<endl;
+    for_each(deck.begin(), deck.end(), printCard);
+    cout<<"Deck printed."<<endl;
 }
 
 template<class Sortable>
