@@ -1,2 +1,2 @@
-# PW-EITI-19Z-AISDI
+# PW-EITI-AISDI-19Z
 Repozytorium dedykowane przedmiotowi Algorytmy I Struktury Danych
