@@ -13,10 +13,15 @@ struct Node {
     Node *left = nullptr;
 };
 
-template<class NodeType> void rotateLeft(Node<NodeType> **node);
-template<class NodeType> void rotateRight(Node<NodeType> **node);
-template<class NodeType> void printNodes(Node<NodeType>* node);
-template<class NodeType> bool nodeExist(Node<NodeType>* node);
+template<class NodeType> void rotateLeft(Node<NodeType> **);
+template<class NodeType> void rotateRight(Node<NodeType> **);
+
+template<class NodeType> bool binaryInsert(Node<NodeType> **, Node<NodeType>*);
+template<class NodeType> bool avlInsert(Node<NodeType> **, Node<NodeType>*);
+
+template<class NodeType> void printNodes(Node<NodeType>* );
+template<class NodeType> bool nodeExist(Node<NodeType>* );
+
 
 int main(int argc, char * argv[])
 {
@@ -76,6 +81,73 @@ void rotateRight(Node<NodeType> **node)
     q = p;
 
     *node = q;
+}
+
+template<class NodeType> 
+bool binaryInsert(Node<NodeType> **rootPtr, Node<NodeType>* newNode)
+{
+    Node<NodeType> *root, *node;
+
+    root = *rootPtr;
+
+    // jeśli drzewo puste
+    if(!nodeExist(root))
+    {
+        *rootPtr = newNode;
+        return true;
+    }
+
+    node = root;
+    do{
+        // mniejsze w lewo
+        if(newNode->value < node->value)
+        {
+            // po lewej pusto, koniec szukania
+            if(!nodeExist(node->left))
+            {
+                node->left = newNode;
+                return true;
+            }
+            // po lewej istnieje element, szukaj dalej
+            node = node->left;
+            continue;
+        }
+
+        // większe w prawo
+        if(newNode->value > node->value)
+        {
+            // po prawej pusto, koniec szukania
+            if(!nodeExist(node->right))
+            {
+                node->right = newNode;
+                return true;
+            }
+            // po prawej istnieje element, szukaj dalej
+            node = node->right;
+            continue;
+        }
+    }while(newNode->value!=node->value);
+
+
+    return false;
+}
+
+template<class NodeType> 
+bool avlInsert(Node<NodeType> **rootPtr, Node<NodeType>* newNode)
+{
+    Node<NodeType> *root, *node;
+
+    root = *rootPtr;
+
+    // #security
+    newNode->left = nullptr;
+    newNode->right = nullptr;
+
+    binaryInsert(rootPtr, newNode);
+
+    // TO DO: balance calc
+    // TO DO: rotations
+    return false;
 }
 
 template<class NodeType>
