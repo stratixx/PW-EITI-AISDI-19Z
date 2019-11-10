@@ -27,8 +27,10 @@ typedef list<card_t> deck_t;
 deck_t& generate(deck_t&);
 deck_t& shuffle(deck_t&);
 void printDeck(deck_t&);
-template<class Sortable> Sortable& selectionSort(Sortable&);
+deck_t& selectionSortStable(deck_t&);
 bool operator <(const card_t&, const card_t&);
+void swapCard(card_t&, card_t&);
+
 ///////////////////////////////////////////////////////////////
 
 
@@ -36,13 +38,15 @@ int main(int argc, char * argv[])
 {
     deck_t deck;
 
-    cout<<"hello World!"<<endl;
-
     generate(deck);
     cout<<"Deck size: "<<deck.size()<<endl;
-    shuffle(deck);
+
+    cout<<"Shuffle start..."<<endl;
+    shuffle(deck); shuffle(deck); shuffle(deck);
+    cout<<"Shuffle end."<<endl;
+
     printDeck(deck);
-    selectionSort(deck);
+    selectionSortStable(deck);
     printDeck(deck);
 
 
@@ -74,17 +78,22 @@ deck_t& shuffle(deck_t& deck)
 {
     card_t card;
     deck_t::iterator iter;
+    deck_t shuffledDeck;
 
-    cout<<"Shuffle start..."<<endl;
+
+    srand(time(NULL));
 
     iter = deck.begin();
-
-    for(int n=0; n<deck.size(); ++n)
+    
+    for(iter=deck.begin(); iter!=deck.end(); ++iter)
     {
-        
+        if(rand()%2)
+            shuffledDeck.push_front(*iter);
+        else
+            shuffledDeck.push_back(*iter);
     }
+    deck = shuffledDeck;
 
-    cout<<"Shuffle end."<<endl;
     return deck;
 }
 
@@ -100,14 +109,32 @@ void printDeck(deck_t& deck)
     cout<<"Deck printed."<<endl;
 }
 
-template<class Sortable>
-Sortable& selectionSort(Sortable& sortable)
+deck_t& selectionSortStable(deck_t& listSortable)
 {
-    cout<<"Selection Sort "<<endl;
-    return sortable;
+    // obecna implementacja jest niestabilna
+    deck_t::iterator i, j, k;
+
+    for(i=listSortable.begin(); i!=listSortable.end(); ++i)
+    {
+        k = i;
+        for(j=i; j!=listSortable.end(); ++j)
+            if(*j < *k)
+                k = j;
+        swapCard(*k, *i);
+    }
+
+    return listSortable;
 }
 
 bool operator <(const card_t& left, const card_t& right)
 {
     return (left.number<right.number);
+}
+
+void swapCard(card_t& left, card_t& right)
+{
+    card_t tmp;
+    tmp = left;
+    left = right;
+    right = tmp;
 }
