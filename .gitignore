@@ -1,6 +1,7 @@
 # Build folders
 bin/
 obj/
+build/
 
 # VSCode files
 .vscode/
