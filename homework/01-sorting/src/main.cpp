@@ -2,35 +2,73 @@
 Autor: Konrad Winnicki
 Utworzono: 03.11.2019
 
+Implementacja algorytmu w 169 linii pliku
+
 Zadanie:
     *   Wygeneruj losową permutację standardowej talii kart.
     *   Posortuj uzyskany ciąg kart w porządku rosnącym w sposób stabilny
-    *   wykorzystując algorytm selection sort i strukturę listy.
+    *   wykorzystując stabilny algorytm selection sort i strukturę listy.
 */
 
 #include <iostream>
 #include <list>
 #include <algorithm>    // std::for_each
+#include <vector>
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////
 
-struct card_t
+class Card
 {
+    public:
+
     int number;
     int colour;
+
+    static vector<std::string> numberString;
+    static vector<std::string> colourString;
+
+    const std::string& getNumberString()
+    {
+        return Card::numberString[number];
+    }
+
+    const std::string& getColourString()
+    {
+        return Card::colourString[colour];
+    }
+
+    bool operator==(const Card& card)
+    {
+        return (this->colour==card.colour)&&(this->number==card.number);
+    }
+
+    static bool lessColour(const Card& left, const Card& right)
+    {
+        return left.colour<right.colour;
+    }
+
+    static bool lessNumber(const Card& left, const Card& right)
+    {
+        return left.number<right.number;
+    }
 };
 
-typedef list<card_t> deck_t;
+typedef list<Card> deck_t;
+typedef bool (*card_cmp_fun_t)(const Card&, const Card&);
 
 deck_t& generate(deck_t&);
 deck_t& shuffle(deck_t&);
 void printDeck(deck_t&);
-deck_t& selectionSortStable(deck_t&);
-bool operator <(const card_t&, const card_t&);
-void swapCard(card_t&, card_t&);
+deck_t& selectionSortStable(deck_t&, card_cmp_fun_t);
 
+
+
+//vector<std::string> Card::colourString = { "Pik", "Kier", "Trefl", "Karo" };
+vector<std::string> Card::colourString = { "\u2660", "\u2666", "\u2663", "\u2764" };
+vector<std::string> Card::numberString = { "2", "3", "4", "5", "6", "7", 
+                                            "8", "9", "10", "J", "Q", "K", "A" };
 ///////////////////////////////////////////////////////////////
 
 
@@ -42,13 +80,31 @@ int main(int argc, char * argv[])
     cout<<"Deck size: "<<deck.size()<<endl;
 
     cout<<"Shuffle start..."<<endl;
-    shuffle(deck); shuffle(deck); shuffle(deck);
+    shuffle(deck); 
+    shuffle(deck); 
+    shuffle(deck);
     cout<<"Shuffle end."<<endl;
 
-    printDeck(deck);
-    selectionSortStable(deck);
-    printDeck(deck);
+    //printDeck(deck);
 
+    cout<<"Unsorted"<<endl;
+    printDeck(deck);
+    cout<<"-------------------------------"<<endl;
+
+    cout<<"Sorting by colour"<<endl;
+    selectionSortStable(deck, Card::lessColour);
+    printDeck(deck);
+    cout<<"-------------------------------"<<endl;
+
+    cout<<"Sorting by number"<<endl;
+    selectionSortStable(deck, Card::lessNumber);
+    printDeck(deck);
+    cout<<"-------------------------------"<<endl;
+
+    cout<<"Again sorting by colour"<<endl;
+    selectionSortStable(deck, Card::lessColour);
+    printDeck(deck);
+    cout<<"-------------------------------"<<endl;
 
     
     return 0;
@@ -57,7 +113,7 @@ int main(int argc, char * argv[])
 
 deck_t& generate(deck_t& deck)
 {
-    card_t card;
+    Card card;
 
     cout<<"Generate "<<endl;
 
@@ -76,7 +132,7 @@ deck_t& generate(deck_t& deck)
 
 deck_t& shuffle(deck_t& deck)
 {
-    card_t card;
+    Card card;
     deck_t::iterator iter;
     deck_t shuffledDeck;
 
@@ -97,9 +153,10 @@ deck_t& shuffle(deck_t& deck)
     return deck;
 }
 
-void printCard(card_t card)
+void printCard(Card card)
 {
-    cout<<"Card( Number: "<<card.number<<"\tColour: "<<card.colour<<" )"<<endl;
+    //cout<<"Card( Number: "<<card.getNumberString()<<"\tColour: "<<card.getColourString()<<" )"<<endl;
+    cout<<card.getNumberString()<<" "<<card.getColourString()<<endl;
 }
 
 void printDeck(deck_t& deck)
@@ -109,32 +166,35 @@ void printDeck(deck_t& deck)
     cout<<"Deck printed."<<endl;
 }
 
-deck_t& selectionSortStable(deck_t& listSortable)
+deck_t& selectionSortStable(deck_t& listSortable, card_cmp_fun_t compareLess)
 {
     // obecna implementacja jest niestabilna
     deck_t::iterator i, j, k;
+    Card card;
 
-    for(i=listSortable.begin(); i!=listSortable.end(); ++i)
+    for(i=listSortable.begin(); i!=listSortable.end(); )
     {
         k = i;
+        //Szukanie najmniejszego elementu z nieposortowanych
         for(j=i; j!=listSortable.end(); ++j)
-            if(*j < *k)
+            if(compareLess(*j, *k))
                 k = j;
-        swapCard(*k, *i);
+
+        // wstawienie najmniejszego elementu jako kolejny z posortowanych
+        if(i!=k)
+        {
+            card = *k;
+            
+            listSortable.remove(*k);
+            listSortable.insert(i, card);
+        }
+        else
+        {
+            ++i;
+        }
+        
+        ///swapCard(*k, *i);
     }
 
     return listSortable;
-}
-
-bool operator <(const card_t& left, const card_t& right)
-{
-    return (left.number<right.number);
-}
-
-void swapCard(card_t& left, card_t& right)
-{
-    card_t tmp;
-    tmp = left;
-    left = right;
-    right = tmp;
 }
