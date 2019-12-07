@@ -78,9 +78,28 @@ namespace {
         void reverse() {
             this->min_heap_mode = !this->min_heap_mode;
 
+            if(!this->min_heap_mode)
+                std::sort(v.begin(), v.end(), compareGreater);
+            else
+                std::sort(v.begin(), v.end(), compareLess);
+
             // TODO: Implement the missing functionality
             // Reversing should work in-place, in O(n) time
-            throw std::runtime_error("ReversibleHeap::reverse() not implemented");
+            //throw std::runtime_error("ReversibleHeap::reverse() not implemented");
+        }
+
+        /**
+         * Compares nodes 
+         */
+        static bool compareLess(const T& lhs, const T& rhs) {
+            return lhs < rhs;
+        }
+
+        /**
+         * Compares nodes 
+         */
+        static bool compareGreater(const T& lhs, const T& rhs) {
+            return lhs > rhs;
         }
 
       private:
