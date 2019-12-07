@@ -9,6 +9,9 @@ Zadanie:
 
 #include <iostream>
 #include <vector>
+#include <cassert>
+
+
 
 
 using namespace std;
@@ -20,10 +23,11 @@ using namespace std;
  * BST
  *
  */
-template<typename KeyType>
+template<typename KeyType, typename DataType>
 class BST {
 public:
     using key_type = KeyType;
+    using data_type = DataType;
 
     BST() = default;    // konstruktor trywialny
     ~BST() {
@@ -35,7 +39,7 @@ public:
 
     class Node {
     public:
-        Node(key_type key) : key(key) {}
+        Node(key_type key, data_type data) : key(key), data(data) {}
         ~Node()
         {
             if(left!=nullptr)
@@ -46,6 +50,11 @@ public:
             right = nullptr;
         }
 
+        void copyContent(Node* node)
+        {
+            key = node->key;
+            data =  node->data;
+        }
 
 	    template<typename StreamType>
 	    void print(StreamType& stream, unsigned long indent=0) const
@@ -62,7 +71,7 @@ public:
             for(int n=0; n<indent; ++n)
                 stream<<'\t';
 
-            stream<<this->key<<std::endl;
+            stream<<this->key<<"("<<this->data<<")"<<std::endl;
 
 
             if(this->left!=nullptr)
@@ -77,6 +86,7 @@ public:
 
 
         key_type key;
+        data_type data;
         Node *left = nullptr;
         Node *right = nullptr;
     };
@@ -101,7 +111,7 @@ public:
 
         while(curr!=nullptr)
         {
-            if(newNode.key<curr->key)
+            if(newNode.key<=curr->key)
             {
                 if(curr->left!=nullptr)
                     curr = curr->left;
@@ -127,141 +137,73 @@ public:
     }
 
     /*
-        Usuwa element o zgodnym kluczu
+        Wykonuje operację usunięcia elementu o zgodnym kluczu, 
+        zwraca nowy root
+    */
+    Node* doRemove(Node* node, key_type key )
+    {
+        if(node==nullptr)
+            return nullptr;
+        
+        if(key < node->key)
+        {
+            //cout<<"usuwany element może być po lewej"<<endl;
+            node->left = doRemove(node->left, key);
+        }
+        else if(key > node->key) 
+        {
+            //cout<<"usuwany element może być po prawej"<<endl;
+            node->right = doRemove(node->right, key);
+        }
+        else
+        {
+            //cout<<"klucz znaleziony"<<endl;
+            Node* tmp;
+
+            if(node->left==nullptr) 
+            {
+                //cout<<"node nie ma lewego dziecka"<<endl;
+                tmp = node->right;
+                node->right = nullptr;
+                delete(node);
+                return tmp;
+            }        
+            if(node->right==nullptr) 
+            {
+                //cout<<"node nie ma prawego dziecka"<<endl;    
+                tmp = node->left;
+                node->left = nullptr;
+                delete(node);
+                return tmp;
+            }
+            
+            //cout<<"node ma dwójkę dzieci"<<endl;
+            //cout<<"szukanie następnika node"<<endl;
+            tmp = node->right;
+            while(tmp->left!=nullptr)
+                tmp = tmp->left;
+            
+            //cout<<"skopiowanie zawartości następnika do usuwanego elementu"<<endl;
+            node->copyContent(tmp);
+            
+            //cout<<"skasowanie następnika"<<endl;
+            node->right = doRemove(node->right, node->key);            
+        }
+
+        return node;
+    }
+
+    /*
+        Inicjuje operację usunięcia elementu o zgodnym kluczu
     */
     void remove( key_type key)
     {
-        Node* parrent = nullptr;
-        Node* curr = root;
-
-        // szukanie elementu o zgodnym kluczu
-        while(curr!=nullptr)
-        {
-            if(curr->key==key) // klucz znaleziony
-                break;
-            if(key < curr->key) // klucz może być po lewej
-            {
-                if(curr->left!=nullptr) // krok w lewo
-                {
-                    parrent = curr;
-                    curr = curr->left;
-                }
-                else // nie znaleziono klucza
-                    curr = nullptr;
-            }
-            else // klucz moze być po prawej
-            {
-                if(curr->right!=nullptr) // krok w prawo
-                {
-                    parrent = curr;
-                    curr = curr->right;
-                }
-                else // nie znaleziono klucza
-                    curr = nullptr;        
-            }
-        }
-
-        if(curr==nullptr) // nie znaleziono klucza
-        {
-            return;
-        }
-
-        // w curr jest Node z pasującym kluczem
-        // w parrent jest rodzic curr
-
-        // jeśli usuwany node nie ma dzieci, skasuj
-        if(curr->left==nullptr && curr->right==nullptr)
-        {
-            if(parrent==nullptr) // usuwanie root
-            {
-                root = nullptr;
-            }
-            else
-            {
-                if(parrent->left==curr)
-                    parrent->left = nullptr;
-                else if( parrent->right==curr)
-                    parrent->right = nullptr;
-                else
-                    throw std::logic_error("Node has parrent, but parrent is not parrent of this child.");
-            }
-            delete curr;
-        }
-        else if(curr->left==nullptr) // node ma tylko prawe dziecko
-        {
-            if(parrent==nullptr) // usuwanie root
-            {
-                root = curr->right;
-            }
-            else
-            {    
-                if(parrent->left==curr)
-                    parrent->left = curr->right;
-                else if( parrent->right==curr)
-                    parrent->right = curr->right;
-                else
-                    throw std::logic_error("Node has parrent, but parrent is not parrent of this child.");
-            }
-            curr->right = nullptr;
-            delete curr;     
-        }
-        else if(curr->right==nullptr) // node ma tylko lewe dziecko
-        {
-            if(parrent==nullptr) // usuwanie root
-            {
-                root = curr->left;
-            }
-            else
-            {    
-                if(parrent->left==curr)
-                    parrent->left = curr->left;
-                else if( parrent->right==curr)
-                    parrent->right = curr->left;
-                else
-                    throw std::logic_error("Node has parrent, but parrent is not parrent of this child.");
-            }
-            curr->left = nullptr;
-            delete curr;            
-        }
-        else // node ma obydwoje dzieci
-        {
-            Node* next = curr->right; // next będzie następnikiem curr
-            Node* nextParrent = curr; // nextParrent będzie parrentem next
-
-            while(next->left!=nullptr) // szukanie następnika curr
-            {
-                nextParrent = next;
-                next = next->left;
-            }     
-            // //jeśli nastęþnik jest bezpośrednim dzieckiem usuwanego elementu
-            // if(curr->right==next)
-            // {
-                
-            // }       
-            // przepięcie prawego dziecka next do nextParrent
-            // if(nextParrent->left==next)
-            //     nextParrent->left = next->right;
-
-            // if(parrent==nullptr) // usuwanie root
-            // {
-            //     root = next;
-            //     root->left = curr->left;
-                
-            // }
-            // else
-            // {    
-            //     if(parrent->left==curr)
-            //         parrent->left = curr->left;
-            //     else if( parrent->right==curr)
-            //         parrent->right = curr->left;
-            //     else
-            //         throw std::logic_error("Node has parrent, but parrent is not parrent of this child.");
-            // }
-
-        }
-        
+        root = doRemove(root, key);         
     }
 
+    /*
+        wypisanie całego drzewa
+    */
 	template<typename StreamType>
 	void print(StreamType& stream) const
 	{
@@ -271,26 +213,121 @@ public:
         root->print(stream);			
 	}
 
+    /* 
+        wykonanie operacji sprawdzenia czy drzewo zachowuje własności BST
+    */
+    bool doIsBST(Node* node)
+    {
+        if(node==nullptr)
+            return true;
+
+        if(node->left!=nullptr)
+        {
+            if(node->left->key > node->key)
+                return false;
+            if(node->left->left!=nullptr && node->left->left->key > node->key)
+                return false;
+            if(node->left->right!=nullptr && node->left->right->key > node->key)
+                return false;
+            if(!doIsBST(node->left))
+                return false;
+        }
+
+        if(node->right!=nullptr)
+        {
+            if(node->right->key <= node->key)
+                return false;
+            if(node->right->left!=nullptr && node->right->left->key <= node->key)
+                return false;
+            if(node->right->right!=nullptr && node->right->right->key <= node->key)
+                return false;
+            if(!doIsBST(node->right))
+                return false;
+        }
+
+        return true;
+    }
+
+    /* 
+        inicjacja operacji sprawdzenia czy drzewo zachowuje własności BST
+    */
+    bool isBST()
+    {
+        return doIsBST(root);
+    }
 
     Node *root = nullptr;
 
 };
 
-//#include "tests.h"
-
 int main(int argc, char *argv[]) {
-    //unit_test();
 
-    std::vector<BST<int>::Node> nodes = { 40, 65, 20, 55, 30, 75, 15, 50, 10, 45, 80, 60, 70, 35, 25 };
-    BST<int> tree;
+    std::vector<BST<int, int>::Node> nodes = { {40, 40}, {65, 65}, {20, 20}, {55, 55}, 
+                                                {30, 30}, {75, 75}, {15, 15}, {50, 50}, 
+                                                {10, 10}, {45, 45}, {80, 80}, {60, 60}, 
+                                                {70, 70}, {35, 35}, {25, 25} };
+    BST<int, int> tree;
 
+    cout<<"Wstawienie elementów do drzewa"<<endl;
     for(auto node : nodes)
     {
         tree.insert(node);
     }
 
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+    cout<<"Zawartość drzewa:"<<endl;
     tree.print(cout);
 
+
+    cout<<"Usunięcie elementu bez dzieci(key=45)"<<endl;
+    tree.remove(45);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+
+    cout<<"Usunięcie elementu z jednym lewym dzieckiem(key=15)"<<endl;
+    tree.remove(15);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+
+    cout<<"Usunięcie elementu z dwójką dzieci(key=65)"<<endl;
+    tree.remove(65);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+
+    cout<<"Usunięcie elementu z jednym prawym dzieckiem(key=75)"<<endl;
+    tree.remove(75);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+
+    cout<<"Usunięcie korzenia(key=40)"<<endl;
+    tree.remove(40);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
+
+    cout<<"Usunięcie nieistniejacego klucza(key=31)"<<endl;
+    tree.remove(31);
+    cout<<"Zawartość drzewa:"<<endl;
+    tree.print(cout);
+    cout<<"Czy drzewo zachowuje własności BST? ";
+    assert(tree.isBST());
+    cout<<"Tak"<<endl;
 
     return 0;
 }
