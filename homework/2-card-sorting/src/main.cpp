@@ -87,21 +87,21 @@ int main(int argc, char * argv[])
 
     //printDeck(deck);
 
-    cout<<"Unsorted"<<endl;
+    cout<<"Unsorted deck. Colours and numbers should be random"<<endl;
     printDeck(deck);
     cout<<"-------------------------------"<<endl;
 
-    cout<<"Sorting by colour"<<endl;
+    cout<<"Sorting by colour, numbers should be random"<<endl;
     selectionSortStable(deck, Card::lessColour);
     printDeck(deck);
     cout<<"-------------------------------"<<endl;
 
-    cout<<"Sorting by number"<<endl;
+    cout<<"Sorting by number, symbols should not be random"<<endl;
     selectionSortStable(deck, Card::lessNumber);
     printDeck(deck);
     cout<<"-------------------------------"<<endl;
 
-    cout<<"Again sorting by colour"<<endl;
+    cout<<"Again sorting by colour, numbers should not be random"<<endl;
     selectionSortStable(deck, Card::lessColour);
     printDeck(deck);
     cout<<"-------------------------------"<<endl;
