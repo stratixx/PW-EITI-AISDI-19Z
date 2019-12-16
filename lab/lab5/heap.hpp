@@ -78,6 +78,12 @@ class Heap
     }
 
     public:
+    
+    size_type size() const
+    {
+        return vector.size();
+    }
+
     const DataType& front() const 
     {
         if (this->vector.empty()) throw std::out_of_range("calling front() for an empty heap");
@@ -99,6 +105,12 @@ class Heap
             if (!this->vector.empty()) { this->sift_down(0); }
         }
 
+    }
+    
+    template<typename StreamType>
+    void print(StreamType &stream) const
+    {
+        stream<<"TO DO Heap::print"<<std::endl;
     }
 };
 

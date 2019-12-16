@@ -1,11 +1,13 @@
-#ifndef Common_H
-#define Common_H
+#ifndef Graph_H
+#define Graph_H
 
 #include <vector>
 #include <list>
 #include <cassert>
  
-    
+/*
+klasa grafow zapewniajaca reprezentacje w postaci tablicy list sasiedztwa
+*/
 class Graph
 {
     public:
