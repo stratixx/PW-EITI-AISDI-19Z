@@ -84,6 +84,11 @@ class Heap
         return vector.size();
     }
 
+    bool empty()
+    {
+        return vector.empty();
+    }
+
     const DataType& front() const 
     {
         if (this->vector.empty()) throw std::out_of_range("calling front() for an empty heap");

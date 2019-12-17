@@ -11,11 +11,24 @@ class Kruskal
 
     static void process( Graph &minSpanTree, Heap<Graph::Edge> &graph )
     {
-        
+        // inicjacja struktury osobnych zbiorów dla każdego elementu
+        DSVertices dsVertices(graph.size());
+        Graph::Edge edge;
+
         // petla wykona sie vertexCount-1 razy
         for( size_t count = graph.size()-1; count; count--)
         {
+            // wyszukanie krawędzi łączącej wierzchołki z różnych zbiorów
+            do
+            {
+                if(graph.empty())
+                    return;
+                edge = graph.front();
+                graph.pop();
+            }while( dsVertices.findSet(edge.first) == dsVertices.findSet(edge.second) );
 
+            minSpanTree.addEdge(edge);
+            dsVertices.unionSets(edge.first, edge.second);
         }
     }
     
